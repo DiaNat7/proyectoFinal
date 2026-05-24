@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ActivityIndicator, View, StyleSheet } from "react-native";
+<<<<<<< HEAD
 // Asegúrate de que esta ruta coincida con tus carpetas:
 import NavigationStack from "./src/Navigation/NavigationStack"; 
+=======
+import { NavigationContainer } from "@react-navigation/native";
+import NavigationStack from "./src/Navigation/NavigationStack";
+>>>>>>> 8ddd17803310174674f5852475bb7a989d88c446
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
@@ -30,7 +35,13 @@ export default function App() {
   }
 
   return (
+<<<<<<< HEAD
     <NavigationStack userToken={userToken} setUserToken={setUserToken} />
+=======
+    <NavigationContainer>
+      <NavigationStack userToken={userToken} setUserToken={setUserToken} />
+    </NavigationContainer>
+>>>>>>> 8ddd17803310174674f5852475bb7a989d88c446
   );
 }
 
