@@ -14,7 +14,16 @@ module.exports = {
   login: async ({ email, password }) => {
     const user = await User.findOne({ email });
     if (!user) throw { status: 401, message: 'Credenciales inválidas' };
+    
+    // --- NUEVO: Debugging ---
+    console.log("Password enviado:", password);
+    console.log("Hash en DB:", user.password);
+    
     const ok = await bcrypt.compare(password, user.password);
+    
+    console.log("¿La contraseña coincide?:", ok); // <--- Esto nos dirá si es True o False
+    // ------------------------
+
     if (!ok) throw { status: 401, message: 'Credenciales inválidas' };
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     return { token, user: { id: user._id, nombre: user.nombre, email: user.email } };
