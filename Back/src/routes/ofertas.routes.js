@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const svc = require('../services/ofertas.service');
 
+
 router.get('/',       async (req, res, next) => { try { res.json(await svc.getAll());                          } catch(e){ next(e) }});
 router.get('/:id',    async (req, res, next) => { try { res.json(await svc.getById(req.params.id));            } catch(e){ next(e) }});
 router.post('/',      async (req, res, next) => { try { res.status(201).json(await svc.create(req.body));      } catch(e){ next(e) }});

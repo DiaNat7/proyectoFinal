@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const svc = require('../services/auth.service');
 
+
 router.post('/register', async (req, res, next) => {
   try { res.status(201).json(await svc.register(req.body)); } catch(e){ next(e) }
 });
