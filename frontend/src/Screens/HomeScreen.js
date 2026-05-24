@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ofertasService } from "../Services/api";
@@ -22,10 +23,8 @@ export default function HomeScreen({ setUserToken }) {
   const cargarOfertasBackend = async () => {
     try {
       setCargando(true);
-      // Usamos tu método exacto del api.js
       const datosReales = await ofertasService.getAll();
-
-      setOfertas(datosReales);
+      setOfertas(datosReales.reverse());
     } catch (error) {
       Alert.alert("Error de conexión", error.message);
     } finally {
@@ -40,11 +39,35 @@ export default function HomeScreen({ setUserToken }) {
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>{item.titulo}</Text>
-      <Text style={styles.cardTienda}>{item.tienda}</Text>
-      <View style={styles.row}>
-        <Text style={styles.cardPrecio}>${item.precio}</Text>
-        <Text style={styles.cardExpiracion}>Vence: {item.expiracion}</Text>
+      {/* Aplicamos la solución: resizeMode="contain" */}
+      <Image 
+        source={{ uri: item.imagen || "https://via.placeholder.com/400x200.png?text=Oferta+Sin+Imagen" }} 
+        style={styles.cardImage}
+        resizeMode="contain" 
+      />
+      
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle} numberOfLines={2}>
+          {item.titulo}
+        </Text>
+        
+        {item.descripcion ? (
+          <Text style={styles.cardDescripcion} numberOfLines={1}>
+            {item.descripcion}
+          </Text>
+        ) : null}
+
+        <View style={styles.row}>
+          <View style={styles.preciosCol}>
+            <Text style={styles.precioAnterior}>
+              ${item.precioAnterior}
+            </Text>
+            <Text style={styles.cardPrecio}>
+              ${item.precioActual}
+            </Text>
+          </View>
+          <Text style={styles.cardTag}>¡Oferta!</Text>
+        </View>
       </View>
     </View>
   );
@@ -61,12 +84,12 @@ export default function HomeScreen({ setUserToken }) {
       {cargando ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#E75480" />
-          <Text style={styles.loaderText}>Cargando datos del servidor...</Text>
+          <Text style={styles.loaderText}>Actualizando catálogo...</Text>
         </View>
       ) : ofertas.length === 0 ? (
         <View style={styles.loaderContainer}>
           <Text style={styles.loaderText}>
-            No hay ofertas disponibles en este momento.
+            No hay ofertas disponibles. ¡Crea la primera!
           </Text>
         </View>
       ) : (
@@ -78,6 +101,7 @@ export default function HomeScreen({ setUserToken }) {
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
         />
       )}
     </View>
@@ -96,46 +120,77 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#FFB6C1",
+    elevation: 4, 
   },
-  headerTitle: { fontSize: 24, fontWeight: "bold", color: "#E75480" },
-  logoutButton: { padding: 8, backgroundColor: "#ffe4e1", borderRadius: 8 },
+  headerTitle: { fontSize: 26, fontWeight: "bold", color: "#E75480" },
+  logoutButton: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#ffe4e1", borderRadius: 8 },
   logoutText: { color: "#E75480", fontWeight: "bold" },
+  
   loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loaderText: { marginTop: 15, color: "#666", fontSize: 16 },
+  
   listContainer: { padding: 20 },
+  
   card: {
     backgroundColor: "#fff",
-    padding: 20,
     borderRadius: 15,
-    marginBottom: 15,
     borderWidth: 1,
     borderColor: "#FFB6C1",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    overflow: "hidden", 
+    elevation: 3, 
+  },
+  cardImage: {
+    width: "100%",
+    // Regresamos a una altura fija y manejable
+    height: 200, 
+    // Fondo blanco para que los espacios vacíos del "contain" no se noten
+    backgroundColor: "#fff", 
+  },
+  cardContent: {
+    padding: 15,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#333",
+    lineHeight: 24,
     marginBottom: 5,
   },
-  cardTienda: { fontSize: 14, color: "#888", marginBottom: 15 },
+  cardDescripcion: { 
+    fontSize: 14, 
+    color: "#888", 
+    marginBottom: 15,
+    fontStyle: 'italic',
+  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-end", 
   },
-  cardPrecio: { fontSize: 20, fontWeight: "bold", color: "#E75480" },
-  cardExpiracion: {
-    fontSize: 12,
+  preciosCol: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  precioAnterior: {
+    fontSize: 14,
+    color: "#aaa",
+    textDecorationLine: "line-through", 
+    marginBottom: -2, 
+  },
+  cardPrecio: { 
+    fontSize: 26, 
+    fontWeight: "bold", 
     color: "#E75480",
-    backgroundColor: "#ffe4e1",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
+    lineHeight: 28,
+  },
+  cardTag: {
+    fontSize: 12,
+    color: "#fff",
+    backgroundColor: "#E75480",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    fontWeight: "bold",
     overflow: "hidden",
   },
 });
