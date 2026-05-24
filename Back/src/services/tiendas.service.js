@@ -6,4 +6,5 @@ module.exports = {
   create:  (data)     => Tienda.create(data),
   update:  (id, data) => Tienda.findByIdAndUpdate(id, data, { new: true }),
   remove:  (id)       => Tienda.findByIdAndDelete(id)
+  
 };

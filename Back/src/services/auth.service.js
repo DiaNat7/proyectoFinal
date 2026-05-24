@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports = {
   register: async ({ nombre, email, password }) => {
+    
     const existe = await User.findOne({ email });
     if (existe) throw { status: 400, message: 'Email ya registrado' };
     const hash = await bcrypt.hash(password, 10);
