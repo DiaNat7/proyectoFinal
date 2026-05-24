@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const OfertaSchema = new mongoose.Schema({
   titulo:          { type: String, required: true },
   descripcion:     String,

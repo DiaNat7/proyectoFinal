@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const TiendaSchema = new mongoose.Schema({
   nombre:    { type: String, required: true },
   ubicacion: String,
