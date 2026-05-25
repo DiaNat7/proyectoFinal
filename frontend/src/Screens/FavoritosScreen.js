@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
-const API_URL = 'http://localhost:3000';
+const BASE_URL = 'https://proyectofinal-9evf.onrender.com';
 
 export default function FavoritosScreen({ navigation }) {
   const [favoritos, setFavoritos] = useState([]);
@@ -23,7 +23,7 @@ export default function FavoritosScreen({ navigation }) {
       setCargando(true);
       
       getHeaders().then(headers => {
-        fetch(`${API_URL}/favoritos`, { headers })
+        fetch(`${BASE_URL}/favoritos`, { headers })
           .then(res => res.json())
           .then(data => {
             if (isMounted) {
@@ -42,7 +42,7 @@ export default function FavoritosScreen({ navigation }) {
 
   const handleQuitarFavorito = (idFavorito) => {
     getHeaders().then(headers => {
-      fetch(`${API_URL}/favoritos/${idFavorito}`, { method: 'DELETE', headers })
+      fetch(`${BASE_URL}/favoritos/${idFavorito}`, { method: 'DELETE', headers })
         .then(res => {
           if (res.ok) {
             Alert.alert("Listo", "Eliminado");

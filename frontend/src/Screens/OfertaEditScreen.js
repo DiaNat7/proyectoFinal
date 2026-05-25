@@ -20,7 +20,7 @@ export default function OfertaEditScreen({ route, navigation }) {
     setLoading(true);
     try {
       // Usamos el método PUT y el ID de la oferta en la URL
-      const response = await fetch(`http://localhost:3000/ofertas/${oferta._id}`, {
+      const response = await fetch(`${BASE_URL}/ofertas/${oferta._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

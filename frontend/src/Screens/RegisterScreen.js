@@ -11,7 +11,7 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    // Validaciones de seguridad de Mell
+    // Validaciones de seguridad
     if (!nombre || !email || !password) {
       Alert.alert("Error", "Por favor completa todos los campos.");
       return;
@@ -27,7 +27,7 @@ export default function RegisterScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // Tu conexión limpia al servidor
+      // conexión limpia al servidor
       await authService.register(nombre, email.toLowerCase(), password);
 
       Alert.alert("¡Éxito!", "Cuenta creada correctamente. ¡Ahora inicia sesión!");

@@ -21,7 +21,6 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Conexión exitosa a MongoDB'))
   .catch(err => console.error('❌ Error de conexión:', err));
 
-// AGREGAMOS '0.0.0.0' PARA QUE EL EMULADOR PUEDA ENTRAR
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor en http://0.0.0.0:${PORT}`);

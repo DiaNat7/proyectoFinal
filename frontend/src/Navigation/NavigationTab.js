@@ -1,9 +1,10 @@
 import React from 'react';
+import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import HomeScreen from '../Screens/HomeScreen';
-import OfertaFormScreen from '../Screens/OfertaFormScreen';
+import CategoriesScreen from '../Screens/CategoriesScreen';
 import TiendasScreen from '../Screens/TiendasScreen';
-import TiendaFormScreen from '../Screens/TiendaFormScreen';
 import FavoritosScreen from '../Screens/FavoritosScreen';
 
 const Tab = createBottomTabNavigator();
@@ -19,18 +20,45 @@ export default function NavigationTab({ setUserToken }) {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#FFB6C1',
-          paddingBottom: 5,
-          height: 60,
+          paddingBottom: 40, 
+          height: 100,       
+          elevation: 40,
         }
       }}
     >
-      <Tab.Screen name="Inicio" component={HomeScreen} initialParams={{ setUserToken }} />
-      <Tab.Screen name="Nueva Oferta" component={OfertaFormScreen} />
+      <Tab.Screen 
+        name="Inicio" 
+        component={HomeScreen} 
+        initialParams={{ setUserToken }} 
+        options={{
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>🏠</Text>
+        }}
+      />
       
-      <Tab.Screen name="Favoritos" component={FavoritosScreen} />
-
-      <Tab.Screen name="Tiendas" component={TiendasScreen} />
-      <Tab.Screen name="Nueva Tienda" component={TiendaFormScreen} />
+      <Tab.Screen 
+        name="Categorías" 
+        component={CategoriesScreen} 
+        options={{
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>🛍️</Text> 
+        }}
+      />
+      
+      <Tab.Screen 
+        name="Tiendas" 
+        component={TiendasScreen} 
+        options={{
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>🏪</Text> 
+        }}
+      />
+      
+      <Tab.Screen 
+        name="Favoritos" 
+        component={FavoritosScreen} 
+        options={{ 
+          tabBarLabel: "Ofertas Favoritas",
+          tabBarIcon: () => <Text style={{ fontSize: 24 }}>❤️</Text> 
+        }} 
+      />
     </Tab.Navigator>
   );
 }

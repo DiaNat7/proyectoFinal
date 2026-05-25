@@ -4,6 +4,11 @@ const jwt = require('jsonwebtoken');
 
 module.exports = {
   register: async ({ nombre, email, password }) => {
+    // Validación 
+    if (!nombre || !email || !password) {
+      throw { status: 400, message: 'Todos los campos son obligatorios' };
+    }
+
     const existe = await User.findOne({ email });
     if (existe) throw { status: 400, message: 'Email ya registrado' };
     
@@ -14,17 +19,16 @@ module.exports = {
   },
 
   login: async ({ email, password }) => {
+    // Validación 
+    if (!email || !password) {
+      throw { status: 400, message: 'Email y contraseña requeridos' };
+    }
+
     const user = await User.findOne({ email });
     if (!user) throw { status: 401, message: 'Credenciales inválidas' };
     
-    console.log("Password enviado:", password);
-    console.log("Hash en DB:", user.password);
-    
     const ok = await bcrypt.compare(password, user.password);
     
-    console.log("¿La contraseña coincide?:", ok); 
-  
-
     if (!ok) throw { status: 401, message: 'Credenciales inválidas' };
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });

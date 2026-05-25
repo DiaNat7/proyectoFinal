@@ -6,7 +6,7 @@ import RegisterScreen from "../Screens/RegisterScreen";
 import NavigationTab from "./NavigationTab"; 
 import OfertaDetailScreen from "../Screens/OfertaDetailScreen"; 
 import OfertaEditScreen from "../Screens/OfertaEditScreen"; 
-
+import CategoriesDetailScreen from "../Screens/CategoriesDetailScreen";
 import TiendaDetailScreen from "../Screens/TiendaDetailScreen";
 import TiendasEditScreen from "../Screens/TiendasEditScreen"; 
 
@@ -29,6 +29,7 @@ export default function NavigationStack({ userToken, setUserToken }) {
             {/* Rutas de Tiendas */}
             <Stack.Screen name="TiendaDetalle" component={TiendaDetailScreen} />
             <Stack.Screen name="TiendaEditar" component={TiendasEditScreen} />
+            <Stack.Screen name="CategoriaDetalle" component={CategoriesDetailScreen} />
           </Stack.Group>
         ) : (
           <Stack.Group>

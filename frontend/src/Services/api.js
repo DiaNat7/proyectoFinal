@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://localhost:3000'; 
+const BASE_URL = 'https://proyectofinal-9evf.onrender.com'
 
 // Función base reutilizable para hacer peticiones al servidor
 const apiRequest = async (endpoint, method = 'GET', body = null, requireAuth = false) => {
@@ -40,7 +40,6 @@ const apiRequest = async (endpoint, method = 'GET', body = null, requireAuth = f
   }
 };
 
-// SERVICIOS CONECTADOS A LAS RUTAS DEL BACKEND
 
 // Autenticación (Login y Registro)
 export const authService = {

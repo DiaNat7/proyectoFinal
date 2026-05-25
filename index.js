@@ -1,7 +1,7 @@
 import { registerRootComponent } from 'expo';
 import { View, Text } from 'react-native';
 
-// Tu componente directamente aquí
+
 function App() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1E1E1E' }}>
@@ -12,5 +12,4 @@ function App() {
   );
 }
 
-// Forzamos a Expo a usar este componente
 registerRootComponent(App);

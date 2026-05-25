@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation, setUserToken }) {
 
     setLoading(true);
     try {
-      //  servicio que ya funciona en el backend
+      //  servicio 
       const data = await authService.login(email, password);
       
       await AsyncStorage.setItem('userToken', data.token);
