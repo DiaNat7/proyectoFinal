@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const svc = require('../services/ofertas.service');
+const { verificarToken, verificarAdmin } = require('../middlewares/auth.middleware');
 
 //aquib nomas los usuarios 
 router.get('/',       verificarToken, async (req, res, next) => { try { res.json(await svc.getAll());               } catch(e){ next(e) }});

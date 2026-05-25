@@ -1,10 +1,15 @@
 const router = require('express').Router();
-const auth = require('../middlewares/auth.middleware');
 const svc  = require('../services/favoritos.service');
+const { verificarToken, verificarAdmin } = require('../middlewares/auth.middleware');
 
 
-router.get('/',       auth, async (req, res, next) => { try { res.json(await svc.getMine(req.user.id));                          } catch(e){ next(e) }});
-router.post('/',      auth, async (req, res, next) => { try { res.status(201).json(await svc.add(req.user.id, req.body.ofertaId)); } catch(e){ next(e) }});
-router.delete('/:id', auth, async (req, res, next) => { try { res.json(await svc.remove(req.params.id));                         } catch(e){ next(e) }});
+//aquib nomas los usuarios 
+router.get('/',       verificarToken, async (req, res, next) => { try { res.json(await svc.getAll());               } catch(e){ next(e) }});
+router.get('/:id',    verificarToken, async (req, res, next) => { try { res.json(await svc.getById(req.params.id)); } catch(e){ next(e) }});
+
+// Solo admin puede crear, editar, eliminar
+router.post('/',      verificarToken, verificarAdmin, async (req, res, next) => { try { res.status(201).json(await svc.create(req.body));            } catch(e){ next(e) }});
+router.put('/:id',    verificarToken, verificarAdmin, async (req, res, next) => { try { res.json(await svc.update(req.params.id, req.body));         } catch(e){ next(e) }});
+router.delete('/:id', verificarToken, verificarAdmin, async (req, res, next) => { try { res.json(await svc.remove(req.params.id));                   } catch(e){ next(e) }});
 
 module.exports = router;

@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const svc = require('../services/tiendas.service');
+const { verificarToken, verificarAdmin } = require('../middlewares/auth.middleware');
 
 router.get('/',       verificarToken, async (req, res, next) => { try { res.json(await svc.getAll());               } catch(e){ next(e) }});
 router.get('/:id',    verificarToken, async (req, res, next) => { try { res.json(await svc.getById(req.params.id)); } catch(e){ next(e) }});

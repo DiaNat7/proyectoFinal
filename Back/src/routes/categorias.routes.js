@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { verificarToken, verificarAdmin } = require('../middlewares/auth.middleware');
 const svc = require('../services/categorias.service');
 
 
