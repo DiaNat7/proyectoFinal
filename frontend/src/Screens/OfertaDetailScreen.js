@@ -1,57 +1,56 @@
 import React from 'react';
-// 1. IMPORTAMOS Platform
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function OfertaDetailScreen({ route, navigation }) {
   const { oferta } = route.params;
 
-  // Separamos la lógica de borrado real para no repetir código
-  const ejecutarEliminacion = async () => {
+  // --- FUNCIÓN PARA AGREGAR A FAVORITOS ---
+  const handleAgregarFavorito = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/ofertas/${oferta._id}`, {
-        method: 'DELETE',
+      const token = await AsyncStorage.getItem("userToken");
+      const response = await fetch('http://localhost:3000/favoritos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ofertaId: oferta._id })
       });
 
-      if (!response.ok) {
-        throw new Error("El servidor no pudo eliminar la oferta");
-      }
+      if (!response.ok) throw new Error("No se pudo agregar a favoritos");
 
-      // Mostramos el éxito dependiendo de la plataforma
-      if (Platform.OS === 'web') {
-        window.alert("La oferta fue eliminada exitosamente.");
-      } else {
-        Alert.alert("Listo", "La oferta fue eliminada exitosamente.");
-      }
-      
-      navigation.navigate('Inicio'); // Forzamos el regreso al Home
+      Alert.alert("¡Éxito!", "Oferta agregada a tus favoritos.");
+      // Navegamos a Favoritos para que se vea el cambio inmediatamente
+      navigation.navigate('Favoritos'); 
     } catch (error) {
-      console.error(error);
-      if (Platform.OS === 'web') {
-        window.alert("Error al eliminar: " + error.message);
-      } else {
-        Alert.alert("Error", "No se pudo eliminar: " + error.message);
-      }
+      Alert.alert("Error", "No se pudo: " + error.message);
     }
   };
 
-  // --- FUNCIÓN PARA ELIMINAR (MULTI-PLATAFORMA) ---
+  // --- FUNCIÓN PARA ELIMINAR ---
+  const ejecutarEliminacion = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/ofertas/${oferta._id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error("El servidor no pudo eliminar la oferta");
+
+      if (Platform.OS === 'web') window.alert("Eliminado exitosamente.");
+      else Alert.alert("Listo", "Eliminado exitosamente.");
+      
+      navigation.navigate('Inicio');
+    } catch (error) {
+      Alert.alert("Error", "No se pudo eliminar.");
+    }
+  };
+
   const handleEliminar = () => {
     if (Platform.OS === 'web') {
-      // Confirmación especial para navegadores web
-      const seguro = window.confirm("¿Estás seguro de que deseas eliminar esta promoción? Esta acción no se puede deshacer.");
-      if (seguro) {
-        ejecutarEliminacion();
-      }
+      if (window.confirm("¿Eliminar promoción?")) ejecutarEliminacion();
     } else {
-      // Confirmación nativa para celulares iOS/Android
-      Alert.alert(
-        "¿Eliminar Promoción?",
-        "Esta acción no se puede deshacer y se borrará de la base de datos.",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Sí, eliminar", style: "destructive", onPress: ejecutarEliminacion }
-        ]
-      );
+      Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Sí, eliminar", style: "destructive", onPress: ejecutarEliminacion }
+      ]);
     }
   };
 
@@ -62,7 +61,7 @@ export default function OfertaDetailScreen({ route, navigation }) {
   return (
     <ScrollView style={styles.container}>
       <Image 
-        source={{ uri: oferta.imagen || "https://via.placeholder.com/400x200.png?text=Oferta+Sin+Imagen" }} 
+        source={{ uri: oferta.imagen || "https://via.placeholder.com/400x200.png?text=Sin+Imagen" }} 
         style={styles.image}
         resizeMode="contain"
       />
@@ -85,6 +84,10 @@ export default function OfertaDetailScreen({ route, navigation }) {
         </View>
 
         <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.btnFavorito} onPress={handleAgregarFavorito}>
+            <Text style={styles.btnText}>❤️ Agregar a Favoritos</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.btnEditar} onPress={handleEditar}>
             <Text style={styles.btnText}>Editar Promoción</Text>
           </TouchableOpacity>
@@ -115,6 +118,7 @@ const styles = StyleSheet.create({
   buttonsContainer: { marginTop: 40, gap: 15 },
   btnEditar: { backgroundColor: '#4A90E2', padding: 15, borderRadius: 10, alignItems: 'center' },
   btnEliminar: { backgroundColor: '#FF3B30', padding: 15, borderRadius: 10, alignItems: 'center' },
+  btnFavorito: { backgroundColor: '#FF69B4', padding: 15, borderRadius: 10, alignItems: 'center' },
   btnText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' },
   btnVolver: { backgroundColor: '#E0E0E0', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 10 },
   btnVolverText: { color: '#333', fontSize: 16, fontWeight: 'bold' }
