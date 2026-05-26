@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { View, TextInput, StyleSheet, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from "../Services/api"; 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { authService } from "../Services/api";
 
 export default function LoginScreen({ navigation, setUserToken }) {
   const [email, setEmail] = useState("");
@@ -17,12 +25,17 @@ export default function LoginScreen({ navigation, setUserToken }) {
 
     setLoading(true);
     try {
-      //  servicio 
+      // Servicio
       const data = await authService.login(email, password);
+
+      // Guarda el token de sesión
+      await AsyncStorage.setItem("userToken", data.token);
       
-      await AsyncStorage.setItem('userToken', data.token);
-      Alert.alert('¡Bienvenido!', `Qué gusto verte, ${data.user.nombre}`);
-      
+      // Guarda el rol del usuario en la memoria del teléfono
+      await AsyncStorage.setItem("userRole", data.user.rol); 
+
+      Alert.alert("¡Bienvenido!", `Qué gusto verte, ${data.user.nombre}`);
+
       setUserToken(data.token); // Esto manda a las pestañas automáticamente
     } catch (error) {
       Alert.alert("Acceso denegado", error.message);
@@ -33,7 +46,7 @@ export default function LoginScreen({ navigation, setUserToken }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Ofertini</Text>
+      <Text style={styles.title}>Ofertin</Text>
       <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
 
       <TextInput
@@ -61,19 +74,56 @@ export default function LoginScreen({ navigation, setUserToken }) {
       )}
 
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={styles.registerLink}>¿No tienes cuenta? Regístrate aquí</Text>
+        <Text style={styles.registerLink}>
+          ¿No tienes cuenta? Regístrate aquí
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: "center", backgroundColor: "#FFF5F5" },
-  title: { fontSize: 32, fontWeight: "bold", textAlign: "center", color: "#E75480", marginBottom: 8 },
-  subtitle: { fontSize: 16, textAlign: "center", color: "#FFB6C1", marginBottom: 30 },
-  input: { borderWidth: 1, borderColor: "#FFB6C1", padding: 15, borderRadius: 12, marginBottom: 15, backgroundColor: "#FFF", fontSize: 16 },
-  loginButton: { backgroundColor: "#E75480", padding: 15, borderRadius: 12, alignItems: "center", marginTop: 10 },
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+    backgroundColor: "#FFF5F5",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#E75480",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#FFB6C1",
+    marginBottom: 30,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#FFB6C1",
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    backgroundColor: "#FFF",
+    fontSize: 16,
+  },
+  loginButton: {
+    backgroundColor: "#E75480",
+    padding: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
   loginButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   loader: { marginTop: 20 },
-  registerLink: { textAlign: "center", marginTop: 20, color: "#E75480", fontWeight: "bold" }
+  registerLink: {
+    textAlign: "center",
+    marginTop: 20,
+    color: "#E75480",
+    fontWeight: "bold",
+  },
 });
