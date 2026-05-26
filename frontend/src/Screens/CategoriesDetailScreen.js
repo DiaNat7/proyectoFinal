@@ -1,3 +1,17 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Platform,
+  Modal,
+  TextInput,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function CategoriesDetailScreen({ route, navigation }) {
   const [categoria, setCategoria] = useState(route.params.categoria);
   const BASE_URL = "https://proyectofinal-9evf.onrender.com";
