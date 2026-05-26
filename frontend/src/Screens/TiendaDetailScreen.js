@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, Platform, Modal, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Platform,
+  Modal,
+  TextInput,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TiendaDetailScreen({ route, navigation }) {
@@ -31,9 +42,9 @@ export default function TiendaDetailScreen({ route, navigation }) {
       const datos = { nombre, ubicacion, contacto, logo };
       const res = await fetch(`${BASE_URL}/tiendas/${tienda._id}`, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(datos),
       });
@@ -51,7 +62,7 @@ export default function TiendaDetailScreen({ route, navigation }) {
       const token = await AsyncStorage.getItem("userToken");
       const response = await fetch(`${BASE_URL}/tiendas/${tienda._id}`, {
         method: "DELETE",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("Error al eliminar");
       Alert.alert("Listo", "Tienda eliminada.");
@@ -64,7 +75,11 @@ export default function TiendaDetailScreen({ route, navigation }) {
   const handleEliminar = () => {
     Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
       { text: "Cancelar", style: "cancel" },
-      { text: "Sí, eliminar", style: "destructive", onPress: ejecutarEliminacion },
+      {
+        text: "Sí, eliminar",
+        style: "destructive",
+        onPress: ejecutarEliminacion,
+      },
     ]);
   };
 
@@ -72,25 +87,108 @@ export default function TiendaDetailScreen({ route, navigation }) {
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.headerBanner}>
-          <Image source={{ uri: tienda.logo || "https://via.placeholder.com/400x200.png" }} style={styles.image} resizeMode="contain" />
+          <Image
+            source={{
+              uri: tienda.logo || "https://via.placeholder.com/400x200.png",
+            }}
+            style={styles.image}
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.content}>
           <Text style={styles.title}>{tienda.nombre}</Text>
           <View style={styles.infoSection}>
-            <Text style={styles.infoLabel}>📍 Ubicación: {tienda.ubicacion}</Text>
-            <Text style={styles.infoLabel}>📞 Contacto: {tienda.contacto}</Text>
+            <Text style={styles.infoLabel}>
+              📍 Ubicación:{" "}
+              <Text style={styles.infoValue}>{tienda.ubicacion}</Text>
+            </Text>
+            <Text style={styles.infoLabel}>
+              📞 Contacto:{" "}
+              <Text style={styles.infoValue}>{tienda.contacto}</Text>
+            </Text>
           </View>
           <View style={styles.buttonsContainer}>
             {userRole === "admin" && (
               <>
-                <TouchableOpacity style={styles.btnEditar} onPress={() => setModalVisible(true)}><Text style={styles.btnText}>Editar</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.btnEliminar} onPress={handleEliminar}><Text style={styles.btnText}>Eliminar</Text></TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.btnEditar}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Text style={styles.btnText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.btnEliminar}
+                  onPress={handleEliminar}
+                >
+                  <Text style={styles.btnText}>Eliminar</Text>
+                </TouchableOpacity>
               </>
             )}
-            <TouchableOpacity style={styles.btnVolver} onPress={() => navigation.goBack()}><Text style={styles.btnVolverText}>Volver</Text></TouchableOpacity>
+            <TouchableOpacity
+              style={styles.btnVolver}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.btnVolverText}>Volver</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+
+      {/* AQUÍ ESTÁ EL MODAL QUE TE FALTABA PARA EDITAR */}
+      <Modal visible={modalVisible} animationType="fade" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Editar Tienda</Text>
+
+            <Text style={styles.labelModal}>Nombre de la tienda:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: Amazon"
+              value={nombre}
+              onChangeText={setNombre}
+            />
+
+            <Text style={styles.labelModal}>Ubicación:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Dirección..."
+              value={ubicacion}
+              onChangeText={setUbicacion}
+            />
+
+            <Text style={styles.labelModal}>Contacto (Tel/Email):</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 476 123 4567"
+              value={contacto}
+              onChangeText={setContacto}
+            />
+
+            <Text style={styles.labelModal}>URL del Logo:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="http://..."
+              value={logo}
+              onChangeText={setLogo}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.btnModal, styles.btnCancelar]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.textBtn}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.btnModal, styles.btnGuardar]}
+                onPress={handleActualizar}
+              >
+                <Text style={styles.textBtn}>Guardar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -125,14 +223,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 30,
   },
-  infoRow: { marginBottom: 15 },
   infoLabel: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#E75480",
-    marginBottom: 4,
+    marginBottom: 10,
   },
-  infoValue: { fontSize: 16, color: "#555", lineHeight: 22 },
+  infoValue: { fontSize: 16, color: "#555", fontWeight: "normal" },
   buttonsContainer: { gap: 15 },
   btnEditar: {
     backgroundColor: "#4A90E2",
