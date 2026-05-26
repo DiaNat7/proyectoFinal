@@ -50,11 +50,6 @@ export default function OfertaDetailScreen({ route, navigation }) {
 
     try {
       const token = await AsyncStorage.getItem("userToken");
-
-      console.log("=== ENVIANDO A FAVORITOS ===");
-      console.log("1. Token existe:", !!token);
-      console.log("2. ID a enviar:", oferta._id);
-
       const response = await fetch(`${BASE_URL}/favoritos`, {
         method: "POST",
         headers: {
@@ -64,11 +59,8 @@ export default function OfertaDetailScreen({ route, navigation }) {
         body: JSON.stringify({ ofertaId: oferta._id }),
       });
 
-      console.log("3. Status del servidor:", response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.log("4. Razón del error:", errorText);
         throw new Error(`Código ${response.status}: ${errorText}`);
       }
 
@@ -77,7 +69,6 @@ export default function OfertaDetailScreen({ route, navigation }) {
 
       navigation.navigate("Favoritos");
     } catch (error) {
-      console.log("5. Error capturado:", error.message);
       Alert.alert("Detalle del Error", error.message);
     }
   };
@@ -116,13 +107,11 @@ export default function OfertaDetailScreen({ route, navigation }) {
   const ejecutarEliminacion = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
-      
-      // AQUI ESTABA EL ERROR: Faltaba el Authorization header
-      const response = await fetch(`${BASE_URL}/ofertas/${oferta._id}`, { 
+      const response = await fetch(`${BASE_URL}/ofertas/${oferta._id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}` 
-        }
+          "Authorization": `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -131,13 +120,20 @@ export default function OfertaDetailScreen({ route, navigation }) {
       }
 
       Alert.alert("Éxito", "Oferta eliminada correctamente");
-      // Al navegar, el useFocusEffect del Home detectará el regreso y recargará la lista
-      navigation.navigate("Inicio"); 
+      navigation.navigate("Inicio");
     } catch (error) {
-      console.log("Error al eliminar:", error);
       Alert.alert("Error", error.message);
     }
   };
+
+  // --- FUNCIÓN AGREGADA QUE FALTABA ---
+  const handleEliminar = () => {
+    Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Sí", style: "destructive", onPress: ejecutarEliminacion },
+    ]);
+  };
+  // ------------------------------------
 
   return (
     <View style={styles.container}>
@@ -172,7 +168,6 @@ export default function OfertaDetailScreen({ route, navigation }) {
           </View>
 
           <View style={styles.buttonsContainer}>
-            {/* Solo los clientes pueden ver y usar Favoritos */}
             {userRole !== "admin" && (
               <TouchableOpacity
                 style={styles.btnFavorito}
@@ -184,7 +179,6 @@ export default function OfertaDetailScreen({ route, navigation }) {
               </TouchableOpacity>
             )}
 
-            {/* Solo el administrador puede ver Editar y Eliminar */}
             {userRole === "admin" && (
               <>
                 <TouchableOpacity
@@ -202,7 +196,6 @@ export default function OfertaDetailScreen({ route, navigation }) {
               </>
             )}
 
-            {/* Este botón lo ven TODOS */}
             <TouchableOpacity
               style={styles.btnVolver}
               onPress={() => navigation.goBack()}
