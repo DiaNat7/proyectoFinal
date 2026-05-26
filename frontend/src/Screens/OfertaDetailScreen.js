@@ -115,18 +115,28 @@ export default function OfertaDetailScreen({ route, navigation }) {
 
   const ejecutarEliminacion = async () => {
     try {
-      await fetch(`${BASE_URL}/ofertas/${oferta._id}`, { method: "DELETE" });
-      navigation.navigate("Inicio");
-    } catch (error) {
-      Alert.alert("Error", "No se pudo eliminar.");
-    }
-  };
+      const token = await AsyncStorage.getItem("userToken");
+      
+      // AQUI ESTABA EL ERROR: Faltaba el Authorization header
+      const response = await fetch(`${BASE_URL}/ofertas/${oferta._id}`, { 
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}` 
+        }
+      });
 
-  const handleEliminar = () => {
-    Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Sí", style: "destructive", onPress: ejecutarEliminacion },
-    ]);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "No se pudo eliminar");
+      }
+
+      Alert.alert("Éxito", "Oferta eliminada correctamente");
+      // Al navegar, el useFocusEffect del Home detectará el regreso y recargará la lista
+      navigation.navigate("Inicio"); 
+    } catch (error) {
+      console.log("Error al eliminar:", error);
+      Alert.alert("Error", error.message);
+    }
   };
 
   return (

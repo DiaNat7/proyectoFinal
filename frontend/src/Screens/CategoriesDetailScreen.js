@@ -1,26 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  Platform,
-  Modal,
-  TextInput,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 export default function CategoriesDetailScreen({ route, navigation }) {
   const [categoria, setCategoria] = useState(route.params.categoria);
   const BASE_URL = "https://proyectofinal-9evf.onrender.com";
-  const bgColor =
-    categoria.color && categoria.color.startsWith("#")
-      ? categoria.color
-      : "#E75480";
-
-  // ESTADO PARA EL ROL
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
@@ -37,38 +17,7 @@ export default function CategoriesDetailScreen({ route, navigation }) {
   const [color, setColor] = useState(categoria.color || "");
   const [descripcion, setDescripcion] = useState(categoria.descripcion || "");
 
-  const handleActualizar = async () => {
-    if (!nombre) {
-      if (Platform.OS === "web") window.alert("El nombre es obligatorio");
-      else Alert.alert("Error", "El nombre es obligatorio");
-      return;
-    }
-
-    try {
-      const datos = { nombre, icono, color, descripcion };
-      const res = await fetch(`${BASE_URL}/categorias/${categoria._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datos),
-      });
-
-      if (!res.ok) throw new Error("No se pudo actualizar la categoría");
-
-      const dataActualizada = await res.json();
-      setCategoria(dataActualizada);
-      setModalVisible(false);
-
-      if (Platform.OS === "web")
-        window.alert("Categoría actualizada con éxito");
-      else Alert.alert("¡Éxito!", "Categoría actualizada con éxito");
-    } catch (error) {
-      console.error(error);
-      if (Platform.OS === "web")
-        window.alert("Error al actualizar: " + error.message);
-      else Alert.alert("Error", error.message);
-    }
-  };
-
+  // Función corregida que faltaba
   const abrirModalEditar = () => {
     setNombre(categoria.nombre);
     setIcono(categoria.icono || "");
@@ -77,41 +26,42 @@ export default function CategoriesDetailScreen({ route, navigation }) {
     setModalVisible(true);
   };
 
+  const handleActualizar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      const datos = { nombre, icono, color, descripcion };
+      const res = await fetch(`${BASE_URL}/categorias/${categoria._id}`, {
+        method: "PUT",
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify(datos),
+      });
+
+      if (!res.ok) throw new Error("No se pudo actualizar");
+      setCategoria(await res.json());
+      setModalVisible(false);
+      Alert.alert("¡Éxito!", "Categoría actualizada");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
   const ejecutarEliminacion = async () => {
     try {
+      const token = await AsyncStorage.getItem("userToken");
       const response = await fetch(`${BASE_URL}/categorias/${categoria._id}`, {
         method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("No se pudo eliminar");
-
-      if (Platform.OS === "web") window.alert("Categoría eliminada.");
-      else Alert.alert("Listo", "Categoría eliminada.");
-
+      Alert.alert("Listo", "Categoría eliminada.");
       navigation.navigate("Categorías");
     } catch (error) {
-      if (Platform.OS === "web") window.alert("Error: " + error.message);
-      else Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message);
     }
   };
-
-  const handleEliminar = () => {
-    if (Platform.OS === "web") {
-      const seguro = window.confirm(
-        "¿Segura que deseas eliminar esta categoría?",
-      );
-      if (seguro) ejecutarEliminacion();
-    } else {
-      Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, eliminar",
-          style: "destructive",
-          onPress: ejecutarEliminacion,
-        },
-      ]);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView>

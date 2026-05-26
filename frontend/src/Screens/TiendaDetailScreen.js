@@ -16,8 +16,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function TiendaDetailScreen({ route, navigation }) {
   const [tienda, setTienda] = useState(route.params.tienda);
   const BASE_URL = "https://proyectofinal-9evf.onrender.com";
-
-  // ESTADO PARA EL ROL
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
@@ -36,17 +34,20 @@ export default function TiendaDetailScreen({ route, navigation }) {
 
   const handleActualizar = async () => {
     if (!nombre || !ubicacion) {
-      if (Platform.OS === "web")
-        window.alert("Nombre y Ubicación son obligatorios");
-      else Alert.alert("Error", "Nombre y Ubicación son obligatorios");
+      Alert.alert("Error", "Nombre y Ubicación son obligatorios");
       return;
     }
 
     try {
+      const token = await AsyncStorage.getItem("userToken");
       const datos = { nombre, ubicacion, contacto, logo };
+      
       const res = await fetch(`${BASE_URL}/tiendas/${tienda._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        },
         body: JSON.stringify(datos),
       });
 
@@ -55,109 +56,68 @@ export default function TiendaDetailScreen({ route, navigation }) {
       const dataActualizada = await res.json();
       setTienda(dataActualizada);
       setModalVisible(false);
-
-      if (Platform.OS === "web")
-        window.alert("Tienda actualizada correctamente");
-      else Alert.alert("¡Éxito!", "Tienda actualizada correctamente");
+      Alert.alert("¡Éxito!", "Tienda actualizada correctamente");
     } catch (error) {
-      console.error(error);
-      if (Platform.OS === "web") window.alert("Error: " + error.message);
-      else Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
   const ejecutarEliminacion = async () => {
     try {
+      const token = await AsyncStorage.getItem("userToken");
       const response = await fetch(`${BASE_URL}/tiendas/${tienda._id}`, {
         method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
       });
+      
       if (!response.ok) throw new Error("Error al eliminar");
 
-      if (Platform.OS === "web") window.alert("Tienda eliminada exitosamente.");
-      else Alert.alert("Listo", "Tienda eliminada exitosamente.");
-
+      Alert.alert("Listo", "Tienda eliminada exitosamente.");
       navigation.navigate("Tiendas");
     } catch (error) {
-      if (Platform.OS === "web") window.alert("No se pudo eliminar");
-      else Alert.alert("Error", "No se pudo eliminar");
+      Alert.alert("Error", "No se pudo eliminar");
     }
   };
 
   const handleEliminar = () => {
-    if (Platform.OS === "web") {
-      if (window.confirm("¿Estás seguro de eliminar esta tienda?"))
-        ejecutarEliminacion();
-    } else {
-      Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, eliminar",
-          style: "destructive",
-          onPress: ejecutarEliminacion,
-        },
-      ]);
-    }
+    Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Sí, eliminar", style: "destructive", onPress: ejecutarEliminacion },
+    ]);
   };
 
   return (
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.headerBanner}>
-          <Image
-            source={{
-              uri:
-                tienda.logo ||
-                "https://via.placeholder.com/400x200.png?text=Sin+Logo",
-            }}
-            style={styles.image}
-            resizeMode="contain"
-          />
+          <Image source={{ uri: tienda.logo || "https://via.placeholder.com/400x200.png?text=Sin+Logo" }} style={styles.image} resizeMode="contain" />
         </View>
 
         <View style={styles.content}>
           <Text style={styles.title}>{tienda.nombre}</Text>
-
           <View style={styles.infoSection}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>📍 Ubicación:</Text>
-              <Text style={styles.infoValue}>
-                {tienda.ubicacion || "No registrada"}
-              </Text>
+              <Text style={styles.infoValue}>{tienda.ubicacion || "No registrada"}</Text>
             </View>
-
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>📞 Contacto:</Text>
-              <Text style={styles.infoValue}>
-                {tienda.contacto || "No registrado"}
-              </Text>
+              <Text style={styles.infoValue}>{tienda.contacto || "No registrado"}</Text>
             </View>
           </View>
 
           <View style={styles.buttonsContainer}>
-            {/* Solo admin ve esto */}
             {userRole === "admin" && (
               <>
-                <TouchableOpacity
-                  style={styles.btnEditar}
-                  onPress={() => setModalVisible(true)}
-                >
+                <TouchableOpacity style={styles.btnEditar} onPress={() => setModalVisible(true)}>
                   <Text style={styles.btnText}>Editar Tienda</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.btnEliminar}
-                  onPress={handleEliminar}
-                >
+                <TouchableOpacity style={styles.btnEliminar} onPress={handleEliminar}>
                   <Text style={styles.btnText}>Eliminar Tienda</Text>
                 </TouchableOpacity>
               </>
             )}
-
-            {/* Lo ven todos */}
-            <TouchableOpacity
-              style={styles.btnVolver}
-              onPress={() => navigation.goBack()}
-            >
+            <TouchableOpacity style={styles.btnVolver} onPress={() => navigation.goBack()}>
               <Text style={styles.btnVolverText}>Volver al Directorio</Text>
             </TouchableOpacity>
           </View>

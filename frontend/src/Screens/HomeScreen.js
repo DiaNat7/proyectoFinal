@@ -51,6 +51,8 @@ export default function HomeScreen({ route, navigation, setUserToken }) {
   const cargarOfertasBackend = async () => {
     try {
       setCargando(true);
+      setOfertas([]);
+      
       const [datosLocales, resExterna] = await Promise.all([
         ofertasService.getAll().catch(() => []),
         fetch("https://dummyjson.com/products?limit=30").catch(() => ({
