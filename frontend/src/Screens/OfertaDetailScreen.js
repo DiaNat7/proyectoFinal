@@ -126,14 +126,14 @@ export default function OfertaDetailScreen({ route, navigation }) {
     }
   };
 
-  // --- FUNCIÓN AGREGADA QUE FALTABA ---
+  //FUNCIÓN AGREGADA QUE FALTABA 
   const handleEliminar = () => {
     Alert.alert("¿Eliminar?", "Esta acción no se puede deshacer.", [
       { text: "Cancelar", style: "cancel" },
       { text: "Sí", style: "destructive", onPress: ejecutarEliminacion },
     ]);
   };
-  // ------------------------------------
+ 
 
   return (
     <View style={styles.container}>

@@ -20,7 +20,7 @@ export default function CategoriesScreen({ navigation }) {
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // --- LECTURA DEL ROL ---
+  // LECTURA DEL ROL
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {

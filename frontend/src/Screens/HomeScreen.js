@@ -22,7 +22,6 @@ export default function HomeScreen({ route, navigation, setUserToken }) {
   const [ofertas, setOfertas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // --- NUEVO: Estado y lectura del rol ---
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ export default function HomeScreen({ route, navigation, setUserToken }) {
     };
     fetchRole();
   }, []);
-  // ---------------------------------------
+  
 
   // Estados para el Modal
   const [modalVisible, setModalVisible] = useState(false);

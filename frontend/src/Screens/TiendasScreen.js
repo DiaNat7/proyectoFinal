@@ -21,7 +21,7 @@ export default function TiendasScreen({ navigation }) {
   const [tiendas, setTiendas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // --- LECTURA DEL ROL ---
+  
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function TiendasScreen({ navigation }) {
     setLogo("");
   };
 
-  // GUARDAR NUEVA TIENDA (Actualizado para enviar token)
+  // GUARDAR NUEVA TIENDA
   const handleGuardarTienda = async () => {
     if (!nombre || !ubicacion) {
       if (Platform.OS === "web")
