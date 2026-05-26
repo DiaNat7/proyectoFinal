@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,24 @@ import {
   Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL = "https://proyectofinal-9evf.onrender.com";
+
 export default function TiendasScreen({ navigation }) {
   const [tiendas, setTiendas] = useState([]);
   const [cargando, setCargando] = useState(true);
+
+  // --- LECTURA DEL ROL ---
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const role = await AsyncStorage.getItem("userRole");
+      setUserRole(role);
+    };
+    fetchRole();
+  }, []);
 
   // ESTADOS PARA EL MODAL DE NUEVA TIENDA
   const [modalVisible, setModalVisible] = useState(false);
@@ -55,7 +68,7 @@ export default function TiendasScreen({ navigation }) {
     setLogo("");
   };
 
-  // GUARDAR NUEVA TIENDA
+  // GUARDAR NUEVA TIENDA (Actualizado para enviar token)
   const handleGuardarTienda = async () => {
     if (!nombre || !ubicacion) {
       if (Platform.OS === "web")
@@ -66,10 +79,14 @@ export default function TiendasScreen({ navigation }) {
 
     try {
       const nuevaTienda = { nombre, ubicacion, contacto, logo };
+      const token = await AsyncStorage.getItem("userToken");
 
       const res = await fetch(`${BASE_URL}/tiendas`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // <-- Token necesario para crear
+        },
         body: JSON.stringify(nuevaTienda),
       });
 
@@ -80,7 +97,7 @@ export default function TiendasScreen({ navigation }) {
 
       setModalVisible(false);
       limpiarFormulario();
-      cargarTiendasBackend(); // Recargar la lista
+      cargarTiendasBackend(); 
     } catch (error) {
       console.error("Error al guardar tienda:", error);
       if (Platform.OS === "web") window.alert("Ocurrió un error al guardar");
@@ -125,16 +142,18 @@ export default function TiendasScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Tiendas</Text>
 
-        {/* BOTÓN PARA AGREGAR TIENDA */}
-        <TouchableOpacity
-          style={styles.btnAgregar}
-          onPress={() => {
-            limpiarFormulario();
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.btnAgregarText}>+ Nueva</Text>
-        </TouchableOpacity>
+        {/* CONDICIONAL: Solo admins ven el botón de Agregar */}
+        {userRole === 'admin' && (
+          <TouchableOpacity
+            style={styles.btnAgregar}
+            onPress={() => {
+              limpiarFormulario();
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.btnAgregarText}>+ Nueva</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {cargando ? (
@@ -182,7 +201,6 @@ export default function TiendasScreen({ navigation }) {
               onChangeText={setUbicacion}
             />
 
-            {/* NUEVO CAMPO DE CONTACTO EN EL FORMULARIO  */}
             <Text style={styles.label}>Contacto (Teléfono / Email):</Text>
             <TextInput
               style={styles.input}
@@ -269,7 +287,7 @@ const styles = StyleSheet.create({
     color: "#E75480",
     fontWeight: "600",
     marginBottom: 15,
-  }, // <-- ESTILO PARA EL CONTACTO
+  },
   row: { flexDirection: "row", justifyContent: "flex-end" },
   cardTag: {
     fontSize: 12,
@@ -280,7 +298,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     fontWeight: "bold",
   },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -329,6 +346,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginHorizontal: 5,
+    
   },
   btnCancelar: { backgroundColor: "#A9A9A9" },
   btnGuardar: { backgroundColor: "#E75480" },

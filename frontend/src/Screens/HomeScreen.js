@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,18 @@ const BASE_URL = "https://proyectofinal-9evf.onrender.com";
 export default function HomeScreen({ route, navigation, setUserToken }) {
   const [ofertas, setOfertas] = useState([]);
   const [cargando, setCargando] = useState(true);
+
+  // --- NUEVO: Estado y lectura del rol ---
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const role = await AsyncStorage.getItem("userRole");
+      setUserRole(role);
+    };
+    fetchRole();
+  }, []);
+  // ---------------------------------------
 
   // Estados para el Modal
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,17 +83,12 @@ export default function HomeScreen({ route, navigation, setUserToken }) {
   // FUNCIÓN DE CERRAR SESIÓN
   const cerrarSesion = async () => {
     try {
-      // Borramos el token del dispositivo
       await AsyncStorage.removeItem("userToken");
-
-      // Buscamos la función en los props o en route.params (initialParams)
       const logout = setUserToken || route.params?.setUserToken;
 
       if (logout) {
-        // Si existe la función, la ejecutamos y el App.js te mandará automáticamente al Login
         logout(null);
       } else {
-        // Fallback: Si no encuentra la función, intentamos navegar directamente
         navigation.navigate("Login");
       }
     } catch (error) {
@@ -161,12 +168,17 @@ export default function HomeScreen({ route, navigation, setUserToken }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Ofertin</Text>
         <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.btnAgregar}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.btnAgregarText}>+ Nueva</Text>
-          </TouchableOpacity>
+          
+          {/* RENDERIZADO CONDICIONAL: Solo el administrador ve el botón de agregar */}
+          {userRole === 'admin' && (
+            <TouchableOpacity
+              style={styles.btnAgregar}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.btnAgregarText}>+ Nueva</Text>
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity onPress={cerrarSesion} style={styles.logoutButton}>
             <Text style={styles.logoutText}>Salir</Text>
           </TouchableOpacity>
@@ -260,6 +272,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   headerTitle: { fontSize: 26, fontWeight: "bold", color: "#E75480" },
+  headerButtons: { flexDirection: "row", alignItems: "center" },
   btnAgregar: {
     backgroundColor: "#E75480",
     paddingHorizontal: 15,

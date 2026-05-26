@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,12 +12,24 @@ import {
   Platform,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL = "https://proyectofinal-9evf.onrender.com";
 
-export default function CategoriasScreen({ navigation }) {
+export default function CategoriesScreen({ navigation }) {
   const [categorias, setCategorias] = useState([]);
   const [cargando, setCargando] = useState(true);
+
+  // --- LECTURA DEL ROL ---
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const role = await AsyncStorage.getItem("userRole");
+      setUserRole(role);
+    };
+    fetchRole();
+  }, []);
 
   // Estados para el Modal de Crear Nueva
   const [modalVisible, setModalVisible] = useState(false);
@@ -52,8 +64,8 @@ export default function CategoriasScreen({ navigation }) {
     }, []),
   );
 
-  // GUARDAR NUEVA
-  const handleGuardar = () => {
+  // GUARDAR NUEVA (Actualizado para enviar token)
+  const handleGuardar = async () => {
     if (!nombre) {
       if (Platform.OS === "web")
         window.alert("El nombre de la categoría es obligatorio");
@@ -63,29 +75,32 @@ export default function CategoriasScreen({ navigation }) {
 
     const datos = { nombre, icono, color, descripcion };
 
-    fetch(`${BASE_URL}/categorias`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datos),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al guardar");
-        return res.json();
-      })
-      .then(() => {
-        if (Platform.OS === "web") window.alert("Categoría creada");
-        else Alert.alert("¡Éxito!", "Categoría creada");
-
-        setModalVisible(false);
-        limpiarFormulario();
-        cargarCategorias();
-      })
-      .catch((err) => {
-        console.log("Error detallado al guardar:", err);
-        if (Platform.OS === "web")
-          window.alert("No se pudo procesar la solicitud");
-        else Alert.alert("Error", "No se pudo procesar la solicitud");
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      
+      const res = await fetch(`${BASE_URL}/categorias`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // <-- Token para que el backend deje pasar al admin
+        },
+        body: JSON.stringify(datos),
       });
+
+      if (!res.ok) throw new Error("Error al guardar");
+      
+      if (Platform.OS === "web") window.alert("Categoría creada");
+      else Alert.alert("¡Éxito!", "Categoría creada");
+
+      setModalVisible(false);
+      limpiarFormulario();
+      cargarCategorias();
+    } catch (err) {
+      console.log("Error detallado al guardar:", err);
+      if (Platform.OS === "web")
+        window.alert("No se pudo procesar la solicitud");
+      else Alert.alert("Error", "No se pudo procesar la solicitud");
+    }
   };
 
   const limpiarFormulario = () => {
@@ -100,7 +115,6 @@ export default function CategoriasScreen({ navigation }) {
       item.color && item.color.startsWith("#") ? item.color : "#E75480";
 
     return (
-      // AHORA AL TOCAR LA TARJETA, VIAJAMOS A LA PANTALLA DE DETALLES
       <TouchableOpacity
         style={[styles.card, { backgroundColor: colorValido }]}
         activeOpacity={0.8}
@@ -126,15 +140,19 @@ export default function CategoriasScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Categorías</Text>
-        <TouchableOpacity
-          style={styles.btnAgregar}
-          onPress={() => {
-            limpiarFormulario();
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.btnAgregarText}>+ Nueva</Text>
-        </TouchableOpacity>
+        
+        {/* CONDICIONAL: Solo admins ven el botón de Agregar */}
+        {userRole === 'admin' && (
+          <TouchableOpacity
+            style={styles.btnAgregar}
+            onPress={() => {
+              limpiarFormulario();
+              setModalVisible(true);
+            }}
+          >
+            <Text style={styles.btnAgregarText}>+ Nueva</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {cargando ? (
