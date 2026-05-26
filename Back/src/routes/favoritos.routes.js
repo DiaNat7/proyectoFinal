@@ -1,14 +1,36 @@
 const router = require('express').Router();
 const svc  = require('../services/favoritos.service');
-const { verificarToken, verificarAdmin } = require('../middlewares/auth.middleware');
+const { verificarToken } = require('../middlewares/auth.middleware');
 
+// OBTENER MIS FAVORITOS
+router.get('/', verificarToken, async (req, res, next) => { 
+  try { 
+    const userId = req.user.id || req.user._id; 
+    res.json(await svc.getMine(userId)); 
+  } catch(e){ 
+    res.status(e.status || 500).json({ error: e.message || "Error al obtener favoritos" });
+  }
+});
 
-//aquib nomas los usuarios 
-router.get('/', verificarToken, async (req, res, next) => { try { res.json(await svc.getAll()); } catch(e){ next(e) }});
-router.get('/:id', verificarToken, async (req, res, next) => { try { res.json(await svc.getById(req.params.id)); } catch(e){ next(e) }});
-// Solo admin puede crear, editar, eliminar
-router.post('/',      verificarToken,  async (req, res, next) => { try { res.status(201).json(await svc.create(req.body));            } catch(e){ next(e) }});
-router.put('/:id',    verificarToken,  async (req, res, next) => { try { res.json(await svc.update(req.params.id, req.body));         } catch(e){ next(e) }});
-router.delete('/:id', verificarToken,  async (req, res, next) => { try { res.json(await svc.remove(req.params.id));                   } catch(e){ next(e) }});
+// AGREGAR UN FAVORITO
+router.post('/', verificarToken, async (req, res, next) => { 
+  try { 
+    const userId = req.user.id || req.user._id;
+    const ofertaId = req.body.ofertaId;
+
+    res.status(201).json(await svc.add(userId, ofertaId)); 
+  } catch(e){ 
+    res.status(e.status || 500).json({ error: e.message || "Error al agregar a favoritos" });
+  }
+});
+
+// ELIMINAR UN FAVORITO
+router.delete('/:id', verificarToken, async (req, res, next) => { 
+  try { 
+    res.json(await svc.remove(req.params.id)); 
+  } catch(e){ 
+    res.status(e.status || 500).json({ error: e.message || "Error al eliminar favorito" });
+  }
+});
 
 module.exports = router;
