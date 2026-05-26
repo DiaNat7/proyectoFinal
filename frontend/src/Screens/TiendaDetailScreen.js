@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  Platform,
-  Modal,
-  TextInput,
-} from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, Platform, Modal, TextInput } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function TiendaDetailScreen({ route, navigation }) {
@@ -37,11 +26,9 @@ export default function TiendaDetailScreen({ route, navigation }) {
       Alert.alert("Error", "Nombre y Ubicación son obligatorios");
       return;
     }
-
     try {
       const token = await AsyncStorage.getItem("userToken");
       const datos = { nombre, ubicacion, contacto, logo };
-      
       const res = await fetch(`${BASE_URL}/tiendas/${tienda._id}`, {
         method: "PUT",
         headers: { 
@@ -50,13 +37,10 @@ export default function TiendaDetailScreen({ route, navigation }) {
         },
         body: JSON.stringify(datos),
       });
-
-      if (!res.ok) throw new Error("No se pudo actualizar la tienda");
-
-      const dataActualizada = await res.json();
-      setTienda(dataActualizada);
+      if (!res.ok) throw new Error("No se pudo actualizar");
+      setTienda(await res.json());
       setModalVisible(false);
-      Alert.alert("¡Éxito!", "Tienda actualizada correctamente");
+      Alert.alert("¡Éxito!", "Tienda actualizada");
     } catch (error) {
       Alert.alert("Error", error.message);
     }
@@ -69,10 +53,8 @@ export default function TiendaDetailScreen({ route, navigation }) {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
-      
       if (!response.ok) throw new Error("Error al eliminar");
-
-      Alert.alert("Listo", "Tienda eliminada exitosamente.");
+      Alert.alert("Listo", "Tienda eliminada.");
       navigation.navigate("Tiendas");
     } catch (error) {
       Alert.alert("Error", "No se pudo eliminar");
@@ -90,94 +72,25 @@ export default function TiendaDetailScreen({ route, navigation }) {
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.headerBanner}>
-          <Image source={{ uri: tienda.logo || "https://via.placeholder.com/400x200.png?text=Sin+Logo" }} style={styles.image} resizeMode="contain" />
+          <Image source={{ uri: tienda.logo || "https://via.placeholder.com/400x200.png" }} style={styles.image} resizeMode="contain" />
         </View>
-
         <View style={styles.content}>
           <Text style={styles.title}>{tienda.nombre}</Text>
           <View style={styles.infoSection}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>📍 Ubicación:</Text>
-              <Text style={styles.infoValue}>{tienda.ubicacion || "No registrada"}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>📞 Contacto:</Text>
-              <Text style={styles.infoValue}>{tienda.contacto || "No registrado"}</Text>
-            </View>
+            <Text style={styles.infoLabel}>📍 Ubicación: {tienda.ubicacion}</Text>
+            <Text style={styles.infoLabel}>📞 Contacto: {tienda.contacto}</Text>
           </View>
-
           <View style={styles.buttonsContainer}>
             {userRole === "admin" && (
               <>
-                <TouchableOpacity style={styles.btnEditar} onPress={() => setModalVisible(true)}>
-                  <Text style={styles.btnText}>Editar Tienda</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.btnEliminar} onPress={handleEliminar}>
-                  <Text style={styles.btnText}>Eliminar Tienda</Text>
-                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnEditar} onPress={() => setModalVisible(true)}><Text style={styles.btnText}>Editar</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.btnEliminar} onPress={handleEliminar}><Text style={styles.btnText}>Eliminar</Text></TouchableOpacity>
               </>
             )}
-            <TouchableOpacity style={styles.btnVolver} onPress={() => navigation.goBack()}>
-              <Text style={styles.btnVolverText}>Volver al Directorio</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={styles.btnVolver} onPress={() => navigation.goBack()}><Text style={styles.btnVolverText}>Volver</Text></TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-
-      <Modal visible={modalVisible} animationType="fade" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Editar Tienda</Text>
-
-            <Text style={styles.labelModal}>Nombre de la tienda:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: Amazon"
-              value={nombre}
-              onChangeText={setNombre}
-            />
-
-            <Text style={styles.labelModal}>Ubicación:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Dirección..."
-              value={ubicacion}
-              onChangeText={setUbicacion}
-            />
-
-            <Text style={styles.labelModal}>Contacto (Tel/Email):</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej: 476 123 4567"
-              value={contacto}
-              onChangeText={setContacto}
-            />
-
-            <Text style={styles.labelModal}>URL del Logo:</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="http://..."
-              value={logo}
-              onChangeText={setLogo}
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.btnModal, styles.btnCancelar]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.textBtn}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.btnModal, styles.btnGuardar]}
-                onPress={handleActualizar}
-              >
-                <Text style={styles.textBtn}>Guardar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
